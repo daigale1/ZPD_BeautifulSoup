@@ -1,0 +1,49 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import time
+
+LOGIN_URL = "https://www.linkedin.com/login"
+EMAIL = "patrickstarcookie@gmail.com"
+PASSWORD = "NsYJKg)?#2pFb*t"
+NETWORK_URL = "https://www.linkedin.com/mynetwork/"
+
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(options=options)
+
+def login():
+    driver.get(LOGIN_URL)
+    time.sleep(2)
+    driver.find_element(By.ID, "username").send_keys(EMAIL)
+    driver.find_element(By.ID, "password").send_keys(PASSWORD + Keys.RETURN)
+    time.sleep(5)
+    
+def events_poga():
+    driver.get(NETWORK_URL)
+    time.sleep(2)
+    events_link = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.LINK_TEXT, "Events"))
+        )
+    events_link.click()
+    time.sleep(5) 
+   
+def iegut_events():
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    events = soup.find_all("p", class_="events-components-shared-discovery-card__event-title link-without-visited-state t-black t-bold")
+    print("\nNotikumi:")
+    for event in events:
+        print(f"- {event.get_text()}")
+
+def main():
+    try:
+        login()
+        events_poga()
+        iegut_events()
+    finally:
+        driver.quit()
+
+if __name__ == "__main__":
+    main()
