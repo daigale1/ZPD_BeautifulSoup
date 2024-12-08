@@ -1,0 +1,13 @@
+import requests
+from bs4 import BeautifulSoup
+
+url = "https://www.theguardian.com/europe"
+response = requests.get(url)
+
+soup = BeautifulSoup(response.text, 'html.parser')
+links = soup.find_all('a', attrs={'aria-label': True})
+aria_labels = [link['aria-label'] for link in links]
+    
+print("Atrastie ziņu virsraksti:")
+for label in aria_labels:
+    print(label)
