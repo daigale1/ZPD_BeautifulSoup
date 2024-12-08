@@ -1,0 +1,43 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+import time
+
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
+
+def televizori(url):
+    tv_list = []
+
+    driver.get(url)
+    time.sleep(3)
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    tv_nosaukumi = soup.find_all('h3', class_='s-item__title')
+    tv_cenas = soup.find_all('span', class_='s-item__price')
+
+    for nosaukumi, cenas in zip(tv_nosaukumi, tv_cenas):
+        tv_list.append({
+            'nosaukumi': nosaukumi.get_text(strip=True),
+            'cenas': cenas.get_text(strip=True)
+        })
+    return tv_list
+
+all_tvs = []
+
+for page in range(1, 6):
+    page_url = f"https://www.ebay.com/b/TVs/11071/bn_738302?_pgn={page}"
+    page_tvs = televizori(page_url)
+    all_tvs.extend(page_tvs)  
+driver.quit()
+
+print("\nAtrasto televizoru nosaukumi un cenas:")
+print("-" * 40)
+for tv in all_tvs:
+    print(f"Nosaukums: {tv['nosaukumi']}")
+    print(f"Cena: {tv['cenas']}")
+    print("-" * 40)
