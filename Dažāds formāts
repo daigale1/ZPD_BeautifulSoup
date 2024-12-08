@@ -1,0 +1,39 @@
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://lv.wikipedia.org/wiki/COVID-19_pand%C4%93mija'
+
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+tabula = soup.find('table', class_='wikitable')
+
+if tabula:
+    rindas = tabula.find_all('tr')
+    for rinda in rindas:
+        kolonnas = rinda.find_all(['td', 'th'])
+        kolonnas = [kolonna.get_text(strip=True) for kolonna in kolonnas]
+        print("\t".join(kolonnas))
+
+latvija = None
+igaunija = None
+
+for nosaukums in soup.find_all('div', class_='mw-heading mw-heading5'):
+    if nosaukums.find('h5', id='Latvija'):
+        latvija = nosaukums
+    elif nosaukums.find('h5', id='Igaunija'):
+        igaunija = nosaukums
+
+if latvija and igaunija:
+    saturs = []
+    current_section = latvija.find_next('h5')
+    while current_section and current_section != igaunija:
+        if current_section.name == 'h5':
+            if 'Igaunija' in current_section.get_text():
+                break
+        elif current_section.name == 'p':
+            saturs.append(current_section.get_text(strip=True))
+        current_section = current_section.find_next()
+
+    print("\nCOVID-19 Latvijā:")
+    for text in saturs:
+        print(text)
