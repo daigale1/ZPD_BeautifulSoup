@@ -1,0 +1,32 @@
+import httpx
+from bs4 import BeautifulSoup
+import time
+
+BASE_URL = "https://www.gutenberg.org/ebooks/search/?sort_order=downloads"
+
+def virsrakstu_iegusana(url):
+    response = httpx.get(url)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, 'html.parser')
+    titles = [title.text.strip() for title in soup.find_all('span', class_='title')]
+    return titles
+
+def rasmosana(base_url, delay=1, max_pages=5):
+    current_index = 0
+    page_number = 1
+
+    while page_number <= max_pages:
+        page_url = f"{base_url}&start_index={current_index}"
+        titles = virsrakstu_iegusana(page_url)
+        
+        print(f"Page {page_number}:")
+        for title in titles:
+            print(title)
+        print("-" * 50)
+        
+        current_index += 25
+        page_number += 1
+        time.sleep(delay) 
+
+if __name__ == "__main__":
+    rasmosana(BASE_URL)
